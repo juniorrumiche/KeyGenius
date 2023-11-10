@@ -21,18 +21,20 @@ import { MdRefresh, MdCopyAll } from "react-icons/md";
 
 function App() {
   const [passwordLength, setPasswordLength] = useState(20);
-  const [hasLowerCase, setHasLowerCase] = useState(true);
-  const [hasUpperCase, setHasUpperCase] = useState(true);
-  const [hasPuntuation, setHasPuntuation] = useState(true);
-  const [hasNumbers, setHasNumbers] = useState(true);
-  const [password, setpassword] = useState<string>();
+  const [options, setOptions] = useState({
+    hasLowerCase: true,
+    hasUpperCase: true,
+    hasPunctuation: true,
+    hasNumbers: true,
+  });
+  const [password, setPassword] = useState("");
   const toast = useToast();
 
   const copyToClipboard = async () => {
-    navigator.clipboard.writeText(password || "");
+    navigator.clipboard.writeText(password);
     toast({
       status: "success",
-      description: "Copiado con exito",
+      description: "Copied successfully",
       isClosable: true,
       position: "top-right",
     });
@@ -41,7 +43,7 @@ function App() {
   const generateRandomPassword = () => {
     const pwdChars = generatePasswordChars();
     if (!pwdChars.length) {
-      setpassword("");
+      setPassword("");
       return;
     }
 
@@ -50,27 +52,28 @@ function App() {
       const randomIndex = Math.floor(Math.random() * pwdChars.length);
       pwd += pwdChars[randomIndex];
     }
-    setpassword(pwd);
+    setPassword(pwd);
   };
 
   const generatePasswordChars = () => {
+    const { hasLowerCase, hasUpperCase, hasPunctuation, hasNumbers } = options;
     let passwordChars = "";
     const lowerChars = "abcdefghijklmnopqrstuvwxyz";
     const upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const numbersChars = "1234567890";
-    const puntuationChars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+    const punctuationChars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
-    passwordChars += hasLowerCase ? lowerChars : "";
-    passwordChars += hasUpperCase ? upperChars : "";
-    passwordChars += hasPuntuation ? puntuationChars : "";
-    passwordChars += hasNumbers ? numbersChars : "";
+    if (hasLowerCase) passwordChars += lowerChars;
+    if (hasUpperCase) passwordChars += upperChars;
+    if (hasPunctuation) passwordChars += punctuationChars;
+    if (hasNumbers) passwordChars += numbersChars;
 
     return passwordChars;
   };
 
   useEffect(() => {
     generateRandomPassword();
-  }, [hasNumbers, hasPuntuation, hasUpperCase, hasLowerCase, passwordLength]);
+  }, [options, passwordLength]);
 
   return (
     <Container py={10} maxWidth="5xl">
@@ -80,24 +83,18 @@ function App() {
             Password Generator
           </Heading>
           <Heading fontWeight="normal" color="gray">
-            Cree contraseñas seguras con el generador de contraseñas
+            Create secure passwords with the password generator
           </Heading>
         </Stack>
 
-        <Stack
-          direction="column"
-          minWidth="80%"
-          bg="teal"
-          p={5}
-          borderRadius="2xl"
-        >
+        <Stack direction="column" minWidth="80%" bg="teal" p={5} borderRadius="2xl">
           <InputGroup>
             <InputLeftElement>
               <IconButton
                 onClick={generateRandomPassword}
                 _hover={{ background: "transparent" }}
                 bg="none"
-                aria-label="..."
+                aria-label="Refresh"
               >
                 <MdRefresh color="white" size={25} />
               </IconButton>
@@ -106,7 +103,7 @@ function App() {
               <IconButton
                 onClick={copyToClipboard}
                 _hover={{ background: "transparent" }}
-                aria-label="..."
+                aria-label="Copy"
                 bg="none"
               >
                 <MdCopyAll color="white" size={25} />
@@ -126,12 +123,11 @@ function App() {
 
         <Stack spacing={5} width="80%">
           <Text color="gray">
-            Use el control deslizante y seleccione algunas de las opciones a
-            continuación para extender su contraseña y aumentar la seguridad.
+            Use the slider and select some of the options below to customize your password and increase security.
           </Text>
           <Slider
             onChange={(value) => setPasswordLength(value)}
-            aria-label="slider-ex-4"
+            aria-label="Password Length"
             min={4}
             max={50}
             defaultValue={passwordLength}
@@ -147,32 +143,32 @@ function App() {
 
         <Stack flexWrap="wrap" spacing={8} direction="row">
           <Checkbox
-            onChange={({ target }) => setHasLowerCase(target.checked)}
+            onChange={({ target }) => setOptions({ ...options, hasLowerCase: target.checked })}
             colorScheme="red"
-            defaultChecked
+            defaultChecked={options.hasLowerCase}
           >
-            Letras
+            Lowercase
           </Checkbox>
           <Checkbox
-            onChange={({ target }) => setHasUpperCase(target.checked)}
+            onChange={({ target }) => setOptions({ ...options, hasUpperCase: target.checked })}
             colorScheme="teal"
-            defaultChecked
+            defaultChecked={options.hasUpperCase}
           >
-            Letras Mayusculas
+            Uppercase
           </Checkbox>
           <Checkbox
-            onChange={({ target }) => setHasPuntuation(target.checked)}
+            onChange={({ target }) => setOptions({ ...options, hasPunctuation: target.checked })}
             colorScheme="teal"
-            defaultChecked
+            defaultChecked={options.hasPunctuation}
           >
-            Puntuación
+            Punctuation
           </Checkbox>
           <Checkbox
-            onChange={({ target }) => setHasNumbers(target.checked)}
+            onChange={({ target }) => setOptions({ ...options, hasNumbers: target.checked })}
             colorScheme="teal"
-            defaultChecked
+            defaultChecked={options.hasNumbers}
           >
-            Números
+            Numbers
           </Checkbox>
         </Stack>
       </VStack>
